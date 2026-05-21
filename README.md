@@ -88,7 +88,7 @@ The **Fotokopi Smart Inventory System** is a web-based platform designed to help
 ---
 
 ## 🔗 Links
-- 📋 Jira Board: [paste Jira link here]
+- 📋 Jira Board: [https://shafiena123.atlassian.net/jira/software/projects/SCRUM/boards/1]
 - 📄 SRS Document: [Version 1.0 - 13/05/2026]
 
 ---

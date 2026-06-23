@@ -71,23 +71,30 @@
                     </h3>
                 </div>
                 <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @forelse($wasteSummary as $w)
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
-                        <div>
-                            <p class="text-xs font-black text-gray-400 uppercase tracking-tighter">{{ $w->reason }}</p>
-                            <p class="text-sm font-bold text-gray-800">{{ $w->product->name }}</p>
-                        </div>
-                        <span class="text-lg font-black text-red-500">-{{ $w->quantity }}</span>
-                    </div>
-                    @empty
-                    <div class="col-span-2 flex flex-col items-center justify-center py-10">
-                        <span class="text-3xl mb-2">✨</span>
-                        <p class="text-gray-400 text-sm font-medium">Perfect efficiency! Zero waste recorded.</p>
-                    </div>
-                    @endforelse
-                </div>
+    @forelse($wasteSummary as $w)
+    {{-- Flex container ensures the quantity stays aligned with the product info --}}
+    <div class="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-2 h-10 bg-rose-500 rounded-full"></div>
+            <div>
+                <p class="text-[10px] font-black text-rose-500 uppercase tracking-widest">{{ $w->reason }}</p>
+                <p class="text-sm font-black text-gray-900">{{ $w->product->name }}</p>
             </div>
         </div>
+        
+        <div class="text-right">
+            <p class="text-lg font-black text-rose-600">-{{ $w->quantity }}</p>
+            <p class="text-[9px] font-bold text-gray-400 uppercase">Units Lost</p>
+        </div>
+    </div>
+    @empty
+    <div class="col-span-2 py-10 text-center border border-dashed border-gray-200 rounded-xl">
+        <p class="text-gray-400 text-xs font-bold uppercase">Perfect efficiency—no waste.</p>
+    </div>
+    @endforelse
+</div>
+        </div>
+    </div>
 
         {{-- 📑 Transaction Ledger --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -102,7 +109,7 @@
                             <th class="px-6 py-4 text-left">Timestamp</th>
                             <th class="px-6 py-4 text-left">Product</th>
                             <th class="px-6 py-4 text-center">Operation</th>
-                            <th class="px-6 py-4 text-center">Delta</th>
+                            <th class="px-6 py-4 text-center">Quantity</th>
                             <th class="px-6 py-4 text-left">Executor</th>
                             <th class="px-6 py-4 text-left">Notes</th>
                         </tr>

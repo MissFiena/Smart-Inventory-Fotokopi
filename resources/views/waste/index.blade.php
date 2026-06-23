@@ -9,7 +9,7 @@
             <h1 class="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
                 🗑️ <span>Waste & Loss Tracking</span>
             </h1>
-            <p class="text-sm text-gray-500 mt-1">📊 Here’s today’s café inventory snapshot — keep spills low and data precise!</p>
+            <p class="text-sm text-gray-500 mt-1">📊 Here’s today’s cafe inventory snapshot — keep spills low and data precise!</p>
         </div>
 
         @if(session('success'))
@@ -35,7 +35,7 @@
             <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-red-50 to-orange-50/30">
                     <h3 class="font-bold text-gray-800 text-base flex items-center gap-2">
-                        🌱 <span>Record Café Loss</span>
+                        🌱 <span>Record Cafe Loss</span>
                     </h3>
                     <p class="text-xs text-gray-500 mt-0.5">Accurately account for discrepancies to maintain high inventory health.</p>
                 </div>

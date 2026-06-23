@@ -1,7 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Add New Product')
 
-{{-- 🛠️ CONNECTS DIRECTLY TO THE NEW LAYOUT TITLE RULES --}}
 @section('page_title', 'Add New Product')
 
 @section('content')

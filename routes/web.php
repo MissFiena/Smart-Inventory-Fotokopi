@@ -30,6 +30,8 @@ Route::middleware('auth')->group(function () {
     // Transaction history
     Route::get('/transactions', [TransactionController::class, 'history'])->name('transactions.history');
 
+    //Batches
+    Route::get('/product/{id}/batches', [ProductController::class, 'showBatches'])->name('product.batches');
 
     // Alerts
     Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');

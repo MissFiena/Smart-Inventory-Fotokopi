@@ -14,33 +14,30 @@ class TransactionController extends Controller
     public function checkInForm()
     {
         $products = Product::where('is_active', true)->orderBy('name')->get();
-        return view('transactions.checkin', compact('products')); // Pointing to your layout-aligned view folder
+        return view('transactions.checkin', compact('products'));
     }
 
     public function checkIn(Request $request)
     {
-        // Added dynamic expiry_date validation requirement 
+        // 1. Updated validation: expiry_date is now nullable
         $request->validate([
             'product_id'  => 'required|exists:products,id',
             'quantity'    => 'required|integer|min:1',
-            'expiry_date' => 'required|date|after_or_equal:today',
+            'expiry_date' => 'nullable|date|after_or_equal:today', 
             'notes'       => 'nullable|string|max:255',
         ]);
 
         $product = Product::findOrFail($request->product_id);
 
-        // Run both creations safely under a database transaction wrapper
         DB::transaction(function () use ($request, $product) {
-            // 📦 1. Create the isolated stock batch row
             StockBatch::create([
                 'product_id'         => $product->id,
                 'initial_quantity'   => $request->quantity,
-                'remaining_quantity' => $request->quantity, // Initially same as initial
-                'expiry_date'        => $request->expiry_date,
+                'remaining_quantity' => $request->quantity,
+                'expiry_date'        => $request->expiry_date, // Can now be NULL
                 'notes'              => $request->notes,
             ]);
 
-            // 📑 2. Record the global system history log row
             Transaction::create([
                 'product_id' => $product->id,
                 'user_id'    => auth()->id(),
@@ -51,22 +48,25 @@ class TransactionController extends Controller
         });
 
         return redirect()->route('dashboard')
-            ->with('success', '✅ Check-In successful: +' . $request->quantity . ' ' . $product->unit . ' of ' . $product->name . ' queued into storage.');
+            ->with('success', '✅ Check-In successful: +' . $request->quantity . ' ' . $product->unit . ' of ' . $product->name);
     }
 
     // ── CHECK-OUT ─────────────────────────────
     public function checkOutForm()
     {
-        // Filter out items that do not have active batch volumes available
+        // 2. Updated filter: include items even if expiry_date is NULL
         $products = Product::where('is_active', true)
             ->whereHas('batches', function ($query) {
                 $query->where('remaining_quantity', '>', 0)
-                      ->where('expiry_date', '>=', now()->toDateString());
+                      ->where(function($q) {
+                          $q->where('expiry_date', '>=', now()->toDateString())
+                            ->orWhereNull('expiry_date');
+                      });
             })
             ->orderBy('name')
             ->get();
 
-        return view('transactions.checkout', compact('products')); // Pointing to your layout-aligned view folder
+        return view('transactions.checkout', compact('products'));
     }
 
     public function checkOut(Request $request)
@@ -74,48 +74,44 @@ class TransactionController extends Controller
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity'   => 'required|integer|min:1',
-            'type'       => 'required|in:out,waste', // Dynamically support allocation styles we introduced in forms
+            'type'       => 'required|in:out,waste',
             'notes'      => 'nullable|string|max:255',
         ]);
 
         $product = Product::findOrFail($request->product_id);
         $requestedQty = $request->quantity;
 
-        // Verify global calculated capacity across all separate batches first
         if ($requestedQty > $product->stock) {
-            return back()->withErrors([
-                'quantity' => 'Insufficient inventory! Only ' . $product->stock . ' total ' . $product->unit . ' available across unexpired active batches.'
-            ])->withInput();
+            return back()->withErrors(['quantity' => 'Insufficient inventory!'])->withInput();
         }
 
-        // ⚡ ENGINE: FIRST-IN, FIRST-OUT (FIFO) BATCH REDUCTION PIPELINE
+        // 3. Updated FIFO Engine: handle NULL expiry dates safely
         DB::transaction(function () use ($product, $requestedQty, $request) {
             $needed = $requestedQty;
 
-            // Gather active batches sorting by earliest expiry date first (FIFO priority)
             $activeBatches = $product->batches()
                 ->where('remaining_quantity', '>', 0)
-                ->where('expiry_date', '>=', now()->toDateString())
+                ->where(function($q) {
+                    $q->where('expiry_date', '>=', now()->toDateString())
+                      ->orWhereNull('expiry_date');
+                })
+                // NULLs usually appear at the end or start; sorting by expiry_date handles them
+                ->orderByRaw('expiry_date IS NULL ASC') 
                 ->orderBy('expiry_date', 'asc')
                 ->get();
 
             foreach ($activeBatches as $batch) {
-                if ($needed <= 0) {
-                    break;
-                }
+                if ($needed <= 0) break;
 
                 if ($batch->remaining_quantity >= $needed) {
-                    // This batch can completely satisfy the remaining balance demand
                     $batch->decrement('remaining_quantity', $needed);
                     $needed = 0;
                 } else {
-                    // Drain this batch completely to 0 and advance the remainder deficit to the next batch
                     $needed -= $batch->remaining_quantity;
                     $batch->update(['remaining_quantity' => 0]);
                 }
             }
 
-            // Record transaction trail entry log with specific type mapping (out vs waste)
             Transaction::create([
                 'product_id' => $product->id,
                 'user_id'    => auth()->id(),
@@ -125,9 +121,7 @@ class TransactionController extends Controller
             ]);
         });
 
-        $actionWord = $request->type === 'waste' ? '🔴 Waste Logged' : '✅ Check-Out';
-        return redirect()->route('dashboard')
-            ->with('success', $actionWord . ': -' . $requestedQty . ' ' . $product->unit . ' from ' . $product->name . ' (FIFO depletion sequence verified).');
+        return redirect()->route('dashboard')->with('success', 'Transaction complete.');
     }
 
     public function history()

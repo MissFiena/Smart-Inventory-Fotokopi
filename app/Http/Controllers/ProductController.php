@@ -7,15 +7,35 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Added with('batches') eager loading to optimize database performance,
-        // and filtered by is_active so deleted/archived items stay hidden.
-        $products = Product::with('batches')
-            ->where('is_active', true)
-            ->latest()
-            ->paginate(15);
-            
+        $query = Product::with('batches')
+            ->where('is_active', true);
+
+        // Apply category filter
+        if ($request->filled('category') && $request->category !== 'all') {
+            $cat = $request->category;
+            // If the category doesn't have a dash (e.g., 'barista'), 
+            // it matches anything starting with 'barista-'
+            if (strpos($cat, '-') === false) {
+                $query->where('category', 'like', $cat . '-%');
+            } else {
+                // Exact match for subcategories (e.g., 'barista-syrups')
+                $query->where('category', $cat);
+            }
+        }
+
+        // Apply search filter (Removed SKU)
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where('name', 'like', '%' . $searchTerm . '%');
+        }
+
+        $products = $query->latest()->paginate(15);
+    
+        // Keep search/category parameters in pagination links
+        $products->appends($request->all());
+
         return view('products.index', compact('products'));
     }
 
@@ -26,30 +46,25 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        // 🛠️ FIXED: Removed 'current_stock' and 'expiry_date' from validation
-        // because master products are initialized at 0 stock. 
-        // Actual quantities and dates must go through Stock Check-In.
+        // Removed SKU from validation
         $data = $request->validate([
             'name'        => 'required|string|max:255',
-            'sku'         => 'nullable|string|unique:products,sku',
             'category'    => 'required|string',
             'unit'        => 'required|string',
             'min_stock'   => 'required|integer|min:0',
             'description' => 'nullable|string',
         ]);
 
-        // Automatically ensure new items are set to active operations status
         $data['is_active'] = true;
 
         Product::create($data);
 
         return redirect()->route('products.index')
-            ->with('success', '☕ Product registered successfully! Proceed to Stock Check-In to log your first arrival batch.');
+            ->with('success', '☕ Product registered successfully!');
     }
 
     public function show(Product $product)
     {
-        // Eager load batches and show recent transaction history
         $product->load('batches');
         $transactions = $product->transactions()->with('user')->latest()->take(20)->get();
         
@@ -58,15 +73,13 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        // Eager load active batches to feed your right-side breakdown UI panels
         $product->load('batches');
         return view('products.edit', compact('product'));
     }
 
     public function update(Request $request, Product $product)
     {
-        // 🛠️ FIXED: Removed 'expiry_date' from validation.
-        // Product master records should never hold a standalone expiration timestamp.
+        // Removed SKU from validation
         $data = $request->validate([
             'name'        => 'required|string|max:255',
             'category'    => 'required|string',
@@ -83,10 +96,18 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // Instead of a hard delete that crashes historical reports data, 
-        // we flip the visibility flag or use standard delete if preferred.
         $product->update(['is_active' => false]);
         
         return back()->with('success', 'Product moved to inactive archive.');
+    }
+
+    public function showBatches($id)
+    {
+        $product = Product::with(['batches' => function($query) {
+            $query->where('remaining_volume', '>', 0)
+                  ->orderBy('expiry_date', 'asc');
+        }])->findOrFail($id);
+
+        return view('products.batches', compact('product'));
     }
 }

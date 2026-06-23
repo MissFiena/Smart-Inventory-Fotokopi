@@ -43,6 +43,13 @@ class DashboardController extends Controller
             'expiring_soon'    => $expiringItems->count(),
         ];
 
-        return view('dashboard', compact('todaysTransactions', 'lowStockProducts', 'expiringItems', 'stats'));
+        // Ensure you are pulling the 'product' relationship
+$expiringSoon = \App\Models\StockBatch::with('product')
+    ->where('expiry_date', '>=', now())
+    ->where('expiry_date', '<=', now()->addDays(7))
+    ->orderBy('expiry_date', 'asc')
+    ->get();
+
+        return view('dashboard', compact('todaysTransactions', 'lowStockProducts', 'expiringItems', 'stats', 'expiringSoon'));
     }
 }

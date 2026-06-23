@@ -79,7 +79,6 @@
                         <select name="type" id="type" required 
                                 class="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 transition duration-150 @error('type') border-rose-500 ring-2 ring-rose-500/10 @enderror">
                             <option value="out" {{ old('type') == 'out' ? 'selected' : '' }}>Used</option>
-                            <option value="waste" {{ old('type') == 'waste' ? 'selected' : '' }}>Waste/Damage</option>
                         </select>
                         @error('type') 
                             <p class="mt-1.5 text-xs font-semibold text-rose-600">{{ $message }}</p> 

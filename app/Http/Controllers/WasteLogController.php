@@ -91,6 +91,6 @@ class WasteLogController extends Controller
             ]);
         });
 
-        return back()->with('success', '🔴 Operational Loss Recorded: -' . $requestedQty . ' ' . $product->unit . ' deducted from ' . $product->name . ' utilizing the FIFO depletion loop sequence.');
+        return back()->with('success', '🔴 Operational Loss Recorded: -' . $requestedQty . ' ' . $product->unit . '');
     }
 }

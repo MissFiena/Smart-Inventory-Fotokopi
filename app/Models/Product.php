@@ -12,7 +12,7 @@ class Product extends Model
 
     protected $fillable = [
         'name', 'sku', 'category', 'unit',
-        'current_stock', 'min_stock', 'expiry_date',
+        'current_stock', 'min_stock',
         'description', 'is_active',
     ];
 
@@ -50,7 +50,10 @@ class Product extends Model
     {
         return $this->batches()
             ->where('remaining_quantity', '>', 0)
-            ->where('expiry_date', '>=', now()->toDateString())
+            ->where(function($q) {
+                $q->where('expiry_date', '>=', now()->toDateString())
+                  ->orWhereNull('expiry_date'); // Include packaging
+            })
             ->sum('remaining_quantity');
     }
 
@@ -98,6 +101,7 @@ class Product extends Model
     {
         $earliestExpiry = $this->batches()
             ->where('remaining_quantity', '>', 0)
+            ->whereNotNull('expiry_date') // Only consider items that actually expire
             ->where('expiry_date', '>=', now()->toDateString())
             ->min('expiry_date');
 
@@ -105,9 +109,7 @@ class Product extends Model
             return false;
         }
 
-        $expiryDate = Carbon::parse($earliestExpiry);
-        // Returns true if date is within the requested day threshold from today (June 2026)
-        return $expiryDate->diffInDays(now()) <= $days;
+        return Carbon::parse($earliestExpiry)->diffInDays(now()) <= $days;
     }
 
     /**
@@ -117,6 +119,7 @@ class Product extends Model
     {
         return $this->batches()
             ->where('remaining_quantity', '>', 0)
+            ->whereNotNull('expiry_date') // Ignore packaging
             ->where('expiry_date', '<', now()->toDateString())
             ->exists();
     }

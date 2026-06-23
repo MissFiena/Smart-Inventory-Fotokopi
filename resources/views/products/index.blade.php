@@ -1,28 +1,24 @@
-<!-- resources/views/products/index.blade.php -->
 @extends('layouts.app')
 @section('title', 'Inventory Ledger')
-
-{{-- 🛠️ CONNECTS DIRECTLY TO THE NEW LAYOUT TITLE RULES --}}
 @section('page_title', 'Inventory Ledger')
 
 @section('content')
-<div class="py-4 bg-gray-50 min-h-screen" x-data="inventoryFilter()">
+<div class="py-4 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         
-        <!-- Header Section -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
                 <h1 class="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
                     📥 <span>Inventory</span>
                 </h1>
-                <p class="text-sm text-gray-500 mt-1">Live overview of product stock volumes, low threshold alerts, and batch distributions.</p>
+                <p class="text-sm text-gray-500 mt-1">Live overview of product stock volumes and batch distributions.</p>
             </div>
 
             @if(auth()->user()->isAdmin())
                 <div class="shrink-0">
                     <a href="{{ route('products.create') }}"
                        class="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-lg shadow-sm hover:from-teal-700 hover:to-emerald-700 transition duration-150">
-                        ➕ Add New Product
+                       ➕ Add New Product
                     </a>
                 </div>
             @endif
@@ -34,235 +30,129 @@
             </div>
         @endif
 
-        {{-- 🔍 REAL-TIME CONTROL UTILITIES BAR --}}
+        {{-- 🔍 SERVER-SIDE CONTROL UTILITIES --}}
         <div class="mb-6 space-y-4">
-            <!-- Search Input Field -->
-            <div class="relative max-w-md shadow-sm rounded-lg">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-sm">
-                    🔍
-                </div>
-                <input type="text" id="inventorySearch" oninput="filterInventoryTable()" placeholder="     Search items by name or SKU"
-                       class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 transition duration-150">
+            <form action="{{ route('products.index') }}" method="GET" class="flex flex-col sm:flex-row gap-3">
+                @if(request('category')) <input type="hidden" name="category" value="{{ request('category') }}"> @endif
+                
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="🔍 Search items by name..."
+                       class="w-full sm:max-w-md px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 transition duration-150">
+                <button type="submit" class="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs font-bold uppercase">Search</button>
+            </form>
+
+            @php $main = explode('-', request('category', ''))[0]; @endphp
+
+            <div class="flex flex-wrap items-center gap-1.5 text-xs font-bold uppercase tracking-wider">
+                <span class="text-gray-400 mr-2 normal-case text-xs font-medium">Category:</span>
+                <a href="{{ route('products.index') }}" class="px-3 py-1.5 rounded-md {{ !request('category') ? 'bg-teal-600 text-white' : 'bg-white text-gray-600 border border-gray-200' }}">All</a>
+                <a href="{{ route('products.index', ['category' => 'barista']) }}" class="px-3 py-1.5 rounded-md {{ $main == 'barista' ? 'bg-teal-600 text-white' : 'bg-white text-gray-600 border border-gray-200' }}">☕ Barista</a>
+                <a href="{{ route('products.index', ['category' => 'kitchen']) }}" class="px-3 py-1.5 rounded-md {{ $main == 'kitchen' ? 'bg-teal-600 text-white' : 'bg-white text-gray-600 border border-gray-200' }}">🍳 Kitchen</a>
             </div>
 
-            <!-- Café Category Filters Bar -->
-            <div class="flex flex-wrap items-center gap-1.5 text-xs font-bold uppercase tracking-wider">
-                <span class="text-gray-400 mr-1.5 normal-case text-xs font-medium">Quick Categorization:</span>
-                <button onclick="filterCategory('all')" class="cat-btn px-3 py-1.5 rounded-md bg-teal-600 text-white transition shadow-sm" data-cat="all">All Items</button>
-                <button onclick="filterCategory('beans')" class="cat-btn px-3 py-1.5 rounded-md bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition" data-cat="beans">☕ Beans</button>
-                <button onclick="filterCategory('syrups')" class="cat-btn px-3 py-1.5 rounded-md bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition" data-cat="syrups">🍯 Syrups</button>
-                <button onclick="filterCategory('powder')" class="cat-btn px-3 py-1.5 rounded-md bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition" data-cat="powder">🍫 Powder</button>
-                <button onclick="filterCategory('dairy')" class="cat-btn px-3 py-1.5 rounded-md bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition" data-cat="dairy">🥛 Dairy</button>
-                <button onclick="filterCategory('packaging')" class="cat-btn px-3 py-1.5 rounded-md bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition" data-cat="packaging">📦 Packaging</button>
-            </div>
+            @if($main == 'barista' || $main == 'kitchen')
+                <div class="flex flex-wrap items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider pl-8 border-l-2 border-gray-200 mt-2">
+                    @php 
+                        $subs = ($main == 'barista') 
+                            ? ['packaging' => 'Packaging', 'syrups' => 'Syrups & Purees', 'coffee' => 'Coffee, Tea & Powders', 'dairy' => 'Dairy & Drinks', 'snacks' => 'Snacks & Add-ons'] 
+                            : ['dry' => 'Dry Ingredients & Seasonings', 'sauces' => 'Sauces & Condiments', 'carbs' => 'Carbs & Staples', 'protein' => 'Frozen Protein & Processed', 'fresh' => 'Fresh Produce', 'packaging' => 'Kitchen Packaging'];
+                    @endphp
+                    @foreach($subs as $slug => $label)
+                        <a href="{{ route('products.index', ['category' => $main.'-'.$slug]) }}" 
+                           class="px-2 py-1 rounded {{ request('category') == $main.'-'.$slug ? 'bg-teal-100 text-teal-800' : 'bg-gray-100 text-gray-500 hover:bg-gray-200' }}">
+                           {{ $label }}
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         </div>
 
-        {{-- 📊 Main Ledger Table Component Card --}}
+        {{-- 📊 Main Ledger Table --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-150 overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left" id="inventoryTable">
+                <table class="w-full text-sm text-left">
                     <thead class="bg-gray-50/70 border-b border-gray-150">
                         <tr class="text-gray-500 text-[11px] font-bold uppercase tracking-wider">
-                            <th class="px-6 py-4">Product Details</th>
-                            <th class="px-6 py-4">Category</th>
+                            <th class="px-6 py-4">Product Name</th> <th class="px-6 py-4">Category</th>
                             <th class="px-6 py-4">Current Stock</th>
                             <th class="px-6 py-4">Min Stock Alert</th>
                             <th class="px-6 py-4">Earliest Batch Expiry</th>
                             <th class="px-6 py-4">System Status</th>
-                            @if(auth()->user()->isAdmin())
-                                <th class="px-6 py-4 text-right">Actions</th>
-                            @endif
+                            @if(auth()->user()->isAdmin()) <th class="px-6 py-4 text-right">Actions</th> @endif
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                    {{-- 🔤 ALPHABETICALLY SORTED VIA PHP COLLECTION SORT --}}
-                    @forelse($products->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $product)
-                        <tr class="hover:bg-teal-50/10 transition-colors inventory-row" 
-                            data-name="{{ strtolower($product->name) }}" 
-                            data-sku="{{ strtolower($product->sku ?? '') }}"
-                            data-category="{{ strtolower($product->category ?? '') }}">
-                            
+                    @forelse($products as $product)
+                        <tr class="hover:bg-teal-50/10 transition-colors">
+                            <td class="px-6 py-4"><span class="font-bold text-gray-900 text-base">{{ $product->name }}</span></td>
                             <td class="px-6 py-4">
-                                <span class="font-bold text-gray-900 block text-base row-item-name">{{ $product->name }}</span>
-                                @if($product->sku)
-                                    <span class="inline-block mt-0.5 text-[10px] font-mono tracking-wider text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{{ $product->sku }}</span>
-                                @else
-                                    <span class="text-[10px] italic text-gray-400">No SKU registered</span>
-                                @endif
+                                <span class="text-[9px] font-black text-teal-600 uppercase tracking-widest block">{{ explode('-', $product->category)[0] }}</span>
+                                <span class="text-xs font-bold text-gray-800">{{ ucwords(str_replace('-', ' ', $product->category)) }}</span>
                             </td>
-                            
                             <td class="px-6 py-4">
-                                <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-gray-100 text-gray-700 uppercase tracking-wider">
-                                    {{ $product->category ?? 'General' }}
-                                </span>
+                                <span class="text-lg font-black {{ $product->isLowStock() ? 'text-rose-600' : 'text-slate-800' }}">{{ $product->stock }}</span>
+                                <span class="text-gray-400 text-xs font-medium uppercase">{{ $product->unit }}</span>
                             </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-baseline gap-1">
-                                    <span class="text-lg font-black {{ $product->isLowStock() ? 'text-rose-600' : 'text-slate-800' }}">
-                                        {{ $product->stock }}
-                                    </span>
-                                    <span class="text-gray-400 text-xs font-medium uppercase">{{ $product->unit }}</span>
-                                </div>
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-600 font-semibold">
-                                {{ $product->min_stock }} <span class="text-[11px] text-gray-400 font-normal uppercase">{{ $product->unit }}</span>
-                            </td>
-                            
+                            <td class="px-6 py-4 text-gray-600 font-semibold">{{ $product->min_stock }} {{ $product->unit }}</td>
                             <td class="px-6 py-4">
-                                @php
-                                    $nearestBatch = $product->batches()->where('remaining_quantity', '>', 0)->orderBy('expiry_date', 'asc')->first();
-                                    $activeBatchesCount = $product->batches()->where('remaining_quantity', '>', 0)->count();
+                                @php 
+                                    $nearest = $product->batches()
+                                        ->where('remaining_quantity', '>', 0)
+                                        ->orderByRaw('expiry_date IS NULL ASC')
+                                        ->orderBy('expiry_date', 'asc')
+                                        ->first(); 
                                 @endphp
 
-                                @if($nearestBatch)
-                                    <div class="space-y-0.5">
-                                        <span class="text-xs font-bold text-gray-700 block">
-                                            📅 {{ \Carbon\Carbon::parse($nearestBatch->expiry_date)->format('d M Y') }}
-                                        </span>
-                                        <span class="text-[10px] text-teal-600 font-medium block">
-                                            📦 Across {{ $activeBatchesCount }} active {{ Str::plural('batch', $activeBatchesCount) }}
-                                        </span>
-                                    </div>
+                                @if($nearest && $nearest->expiry_date)
+                                    <span class="text-xs font-bold text-gray-700">📅 {{ \Carbon\Carbon::parse($nearest->expiry_date)->format('d M Y') }}</span>
+                                @elseif($nearest)
+                                    <span class="text-xs font-medium text-gray-400 italic">No expiry</span>
                                 @else
                                     <span class="text-xs font-medium text-gray-400 italic">No batches active</span>
                                 @endif
                             </td>
                             
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            {{-- UPDATED SYSTEM STATUS COLUMN --}}
+                            <td class="px-6 py-4">
                                 @php
-                                    $daysToExpiry = null;
-                                    if ($nearestBatch) {
-                                        $daysToExpiry = now()->diffInDays(\Carbon\Carbon::parse($nearestBatch->expiry_date), false);
-                                    }
+                                    $isExpired = $nearest && $nearest->expiry_date && \Carbon\Carbon::parse($nearest->expiry_date)->isPast();
+                                    $isLowStock = $product->stock <= $product->min_stock && $product->stock > 0;
+                                    $isOutOfStock = $product->stock <= 0;
                                 @endphp
 
-                                @if($nearestBatch && $daysToExpiry < 0)
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md bg-rose-100 text-rose-700 border border-rose-200">
-                                        🚨 Expired
-                                    </span>
-                                @elseif($nearestBatch && $daysToExpiry >= 0 && $daysToExpiry <= 30)
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md bg-amber-100 text-amber-700 border border-amber-200">
-                                        ⏳ Near Expiry
-                                    </span>
-                                @elseif($product->stock <= 0)
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md bg-gray-100 text-gray-500 border border-gray-200">
-                                        📦 Out of Stock
-                                    </span>
-                                @elseif($product->isLowStock())
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md bg-red-50 text-red-700 border border-red-100">
-                                        ⚠️ Low Stock
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                        ✅ Stable
-                                    </span>
-                                @endif
+                                <span class="whitespace-nowrap text-[11px] font-black uppercase px-2.5 py-1 rounded-md 
+                                    {{ $isExpired ? 'bg-red-100 text-red-800' : 
+                                       ($isOutOfStock ? 'bg-gray-100 text-gray-500' : 
+                                       ($isLowStock ? 'bg-orange-100 text-orange-700' : 'bg-emerald-50 text-emerald-700')) }}">
+                                    
+                                    {{ $isExpired ? 'Expired' : 
+                                       ($isOutOfStock ? 'Out of Stock' : 
+                                       ($isLowStock ? 'Low Stock' : 'Stable')) }}
+                                </span>
                             </td>
-                            
+
                             @if(auth()->user()->isAdmin())
                                 <td class="px-6 py-4 whitespace-nowrap text-right">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('products.edit', $product) }}"
-                                           class="text-xs font-bold text-teal-600 hover:text-teal-800 bg-teal-50 px-2.5 py-1.5 rounded transition">
-                                            Edit
-                                        </a>
-                                        <form method="POST" action="{{ route('products.destroy', $product) }}"
-                                              onsubmit="return confirm('Are you sure you want to delete this master product? This wipes out its full batch history!')"
-                                              class="inline">
-                                            @csrf 
-                                            @method('DELETE')
-                                            <button class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 px-2.5 py-1.5 rounded transition">
-                                                Delete
-                                            </button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="{{ route('products.edit', $product) }}" class="text-xs font-bold text-teal-600 hover:text-teal-800 bg-teal-50 px-2.5 py-1.5 rounded transition">Edit</a>
+                                        <form method="POST" action="{{ route('products.destroy', $product) }}" onsubmit="return confirm('Are you sure you want to delete this product?')" class="inline">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 px-2.5 py-1.5 rounded transition">Delete</button>
                                         </form>
                                     </div>
                                 </td>
                             @endif
                         </tr>
                     @empty
-                        <tr id="emptyRow">
-                            <td colspan="{{ auth()->user()->isAdmin() ? 7 : 6 }}" class="px-6 py-16 text-center">
-                                <div class="text-3xl mb-2">📦</div>
-                                <h3 class="text-sm font-bold text-gray-700">The product ledger repository is empty</h3>
-                                <p class="text-xs text-gray-400 mt-0.5 max-w-xs mx-auto">No raw ingredients or items are registered in FOTOKOPI yet.</p>
-                            </td>
-                        </tr>
+                        <tr><td colspan="7" class="px-6 py-16 text-center text-gray-400">No products found.</td></tr>
                     @endforelse
-                    
-                    <!-- Search Not Found Row Fallback -->
-                    <tr id="noResultsRow" class="hidden">
-                        <td colspan="{{ auth()->user()->isAdmin() ? 7 : 6 }}" class="px-6 py-12 text-center text-gray-400 italic text-sm">
-                            No matching products found in this category...
-                        </td>
-                    </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        @if($products->hasPages())
-            <div class="mt-6 bg-white px-4 py-3 rounded-lg border border-gray-150 shadow-sm">
-                {{ $products->links() }}
-            </div>
-        @endif
-
+        <div class="mt-6">
+            {{ $products->links() }}
+        </div>
     </div>
 </div>
-
-{{-- ⚡ COMPACT CLIENT-SIDE SEARCH ENGINE & FILTER CONTROLLER --}}
-<script>
-    let activeCategory = 'all';
-
-    function filterCategory(cat) {
-        activeCategory = cat.toLowerCase();
-        
-        // Update Filter Pill Buttons Styling
-        document.querySelectorAll('.cat-btn').forEach(btn => {
-            if(btn.getAttribute('data-cat') === cat) {
-                btn.className = "cat-btn px-3 py-1.5 rounded-md bg-teal-600 text-white transition shadow-sm";
-            } else {
-                btn.className = "cat-btn px-3 py-1.5 rounded-md bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition";
-            }
-        });
-
-        filterInventoryTable();
-    }
-
-    function filterInventoryTable() {
-        const searchInput = document.getElementById('inventorySearch').value.toLowerCase().trim();
-        const rows = document.querySelectorAll('.inventory-row');
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-            const name = row.getAttribute('data-name');
-            const sku = row.getAttribute('data-sku');
-            const category = row.getAttribute('data-category');
-
-            // Category matching rule
-            const matchesCategory = (activeCategory === 'all' || category.includes(activeCategory));
-            
-            // Search string matching rule
-            const matchesSearch = (!searchInput || name.includes(searchInput) || sku.includes(searchInput));
-
-            if (matchesCategory && matchesSearch) {
-                row.classList.remove('hidden');
-                visibleCount++;
-            } else {
-                row.classList.add('hidden');
-            }
-        });
-
-        // Toggle No Results feedback warning line items
-        const noResults = document.getElementById('noResultsRow');
-        if (noResults) {
-            if (visibleCount === 0 && rows.length > 0) {
-                noResults.classList.remove('hidden');
-            } else {
-                noResults.classList.add('hidden');
-            }
-        }
-    }
-</script>
 @endsection

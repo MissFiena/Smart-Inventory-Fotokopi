@@ -74,11 +74,11 @@
                     <!-- 📅 Expiry Date Selector -->
                     <div>
                         <label for="expiry_date" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2 flex items-center gap-1.5">
-                            📅 Expiry Date <span class="text-rose-500">*</span>
+                            📅 Expiry Date <span class="text-gray-400 font-normal text-[10px]">(Optional for packaging)</span>
                         </label>
-                        <input type="date" name="expiry_date" id="expiry_date" required
-                               value="{{ old('expiry_date') }}"
-                               class="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 transition duration-150 @error('expiry_date') border-rose-500 ring-2 ring-rose-500/10 @enderror">
+                        <input type="date" name="expiry_date" id="expiry_date" 
+                            value="{{ old('expiry_date') }}"
+                            class="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 transition duration-150 @error('expiry_date') border-rose-500 ring-2 ring-rose-500/10 @enderror">
                         @error('expiry_date') 
                             <p class="mt-1.5 text-xs font-semibold text-rose-600">{{ $message }}</p> 
                         @enderror

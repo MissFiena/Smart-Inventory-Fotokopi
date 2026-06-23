@@ -24,7 +24,7 @@ return new class extends Migration
             $table->integer('remaining_quantity')->default(0);
             
             // ⏳ Expiry and Control Fields
-            $table->date('expiry_date');
+            $table->date('expiry_date')->nullable();
             $table->text('notes')->nullable();
             
             $table->timestamps();

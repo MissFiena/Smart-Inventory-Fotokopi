@@ -1,58 +1,110 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# 🗂️ Smart Inventory: Inventory & Stock Tracking System for Fotokopi
 
-## About Laravel
+> A web-based inventory management system developed for Fotokopi to manage stock efficiently and systematically.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![Version](https://img.shields.io/badge/Version-1.0-blue)
+![Status](https://img.shields.io/badge/Status-In%20Progress-yellow)
+![Course](https://img.shields.io/badge/Course-DES3073-green)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 👥 Group Members & Responsibilities
 
-## Learning Laravel
+| No. | Name | Module | Role |
+|-----|------|--------|------|
+| 1 | Shafiena binti Usri | Inventory Quality Score & Smart Usage Prediction | Leader |
+| 2 | Miza Nafisah binti Imran | Item/Product Management & Stock Check-In/Check-Out | Member |
+| 3 | Farysha Adella binti Abdullah | User Authentication & Roles | Member |
+| 4 | Farah Nabila binti Shamsul Anuar | Dashboard & Reports/Notifications | Member |
+| 5 | Zarith Sufizah binti Abu Bakar | Stock Expiry Reminder & Waste/Loss Tracking | Member |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 📌 Project Description
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+The **Fotokopi Smart Inventory System** is a web-based platform designed to help Fotokopi manage inventory operations efficiently. The system supports:
+- Stock monitoring & tracking
+- Stock check-in and check-out
+- Expiry tracking & waste/loss recording
+- Dashboard reporting & notifications
+- Smart inventory analysis & health scoring
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## ✅ Functional Requirements
 
-```bash
-composer require laravel/boost --dev
+| FR_ID | Requirement | Assigned To | Status |
+|-------|------------|-------------|--------|
+| FR001 | User Login/Logout | Farysha Adella | 🔄 In Progress |
+| FR002 | Recover User Password | Farysha Adella | 🔄 In Progress |
+| FR003 | View User Role | Farysha Adella | 🔄 In Progress |
+| FR004 | View Audit Logs | Farysha Adella | 🔄 In Progress |
+| FR005 | Create Inventory Item | Miza Nafisah | 🔄 In Progress |
+| FR006 | Update Inventory Item | Miza Nafisah | 🔄 In Progress |
+| FR007 | Delete Inventory Item | Miza Nafisah | 🔄 In Progress |
+| FR008 | View Inventory Item | Miza Nafisah | 🔄 In Progress |
+| FR009 | Categorize Inventory Item | Miza Nafisah | 🔄 In Progress |
+| FR010 | Search Inventory Item | Miza Nafisah | 🔄 In Progress |
+| FR011 | Filter Inventory Item | Miza Nafisah | 🔄 In Progress |
+| FR012 | Manage Supplier Details | Miza Nafisah | 🔄 In Progress |
+| FR013 | Record Stock Check-In | Miza Nafisah | 🔄 In Progress |
+| FR014 | Record Stock Check-Out | Miza Nafisah | 🔄 In Progress |
+| FR015 | Auto Update Stock Level | Miza Nafisah | 🔄 In Progress |
+| FR016 | View Stock Dashboard | Farah Nabila | 🔄 In Progress |
+| FR017 | View Low Stock Alert | Farah Nabila | 🔄 In Progress |
+| FR018 | View Overstock Alert | Farah Nabila | 🔄 In Progress |
+| FR019 | Generate Stock Report | Farah Nabila | 🔄 In Progress |
+| FR020 | View Stock Transaction History | Farah Nabila | 🔄 In Progress |
+| FR021 | View Expiry Reminders | Zarith Sufizah | 🔄 In Progress |
+| FR022 | Receive Expiry Notification | Zarith Sufizah | 🔄 In Progress |
+| FR023 | Record Waste & Loss | Zarith Sufizah | 🔄 In Progress |
+| FR024 | View Waste & Loss Summary | Zarith Sufizah | 🔄 In Progress |
+| FR025 | View Inventory Health Score | Shafiena Usri | 🔄 In Progress |
+| FR026 | View Smart Usage Predictions | Shafiena Usri | 🔄 In Progress |
+| FR027 | View Restock Suggestions | Shafiena Usri | 🔄 In Progress |
 
-php artisan boost:install
-```
+---
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## ⚙️ Non-Functional Requirements
 
-## Contributing
+| QR_ID | Type | Requirement | Assigned To | Status |
+|-------|------|------------|-------------|--------|
+| QR001 | Security | Only authenticated users can access the system. Unauthorized access must be blocked. | Farysha Adella | 🔄 In Progress |
+| QR002 | Security | Role-based access strictly enforced. Staff cannot access Admin-only functions. | Farysha Adella | 🔄 In Progress |
+| QR003 | User Friendly | Login & password recovery interface must be simple and straightforward. | Farysha Adella | 🔄 In Progress |
+| QR004 | Performance | Login/logout response within 3 seconds under normal network conditions. | Farysha Adella | 🔄 In Progress |
+| QR005 | Accuracy | Stock levels updated instantly and accurately after every check-in or check-out. | Miza Nafisah | 🔄 In Progress |
+| QR006 | User Friendly | Dashboard displays real-time stock overview, low stock and overstock alerts clearly. | Farah Nabila | 🔄 In Progress |
+| QR007 | Performance | Dashboard loads and reflects latest records within 3 seconds. | Farah Nabila | 🔄 In Progress |
+| QR008 | Timeliness | Low stock alerts and expiry reminders triggered within 24 hours of condition being met. | Zarith Sufizah | 🔄 In Progress |
+| QR009 | Accuracy | Inventory Health Score recalculated automatically each time stock data is updated. | Shafiena Usri | 🔄 In Progress |
+| QR010 | Accuracy | Smart usage predictions based on at least 7 days of recorded stock transaction history. | Shafiena Usri | 🔄 In Progress |
+| QR011 | Maintainability | Complete uneditable audit log of all user activities with accurate timestamps. | Farysha Adella | 🔄 In Progress |
+| QR012 | Integrity | System prevents negative stock values, duplicate items and incomplete waste/loss records. | Miza Nafisah | 🔄 In Progress |
+| QR013 | User Friendly | Search and filter returns relevant results instantly within a few clicks. | Miza Nafisah | 🔄 In Progress |
+| QR014 | Performance | Stock reports generated and displayed within 5 seconds of Admin's request. | Farah Nabila | 🔄 In Progress |
+| QR015 | Information | Waste and loss summary accurately reflects all recorded entries. Accessible to Admin only. | Zarith Sufizah | 🔄 In Progress |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 🔗 Links
+- 📋 Jira Board: [https://shafiena123.atlassian.net/jira/software/projects/SCRUM/boards/1]
+- 📄 SRS Document: [Version 1.0 - 13/05/2026]
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 🛠️ Tech Stack
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Layer | Technology |
+|-------|-----------|
+| Frontend | HTML, CSS, JavaScript, Bootstrap |
+| Backend | PHP (Laravel Framework) |
+| Database | MySQL |
+| Server | Apache (XAMPP) |
+| Version Control | Git & GitHub |
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+*Last updated: May 2026 | DES3073 | Universiti Pendidikan Sultan Idris*
+>>>>>>> 0d3291bf26bb8f445a7c0d04f90cbc16bb9c022b
